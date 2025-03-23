@@ -4,7 +4,12 @@ Methods for fast string operations
 @license MIT/X11
 @module stringy
 */
-#define LUA_LIB
+#ifdef _WINDLL
+#include <windows.h>
+#define  DLL __declspec(dllexport)
+#else
+#define  DLL //empty
+#endif
 #include <lua.h>
 #include <lauxlib.h>
 #include <stdio.h>
@@ -179,7 +184,7 @@ static int join(lua_State *L) {
     luaL_Buffer buffer;
     luaL_buffinit(L, &buffer);
     int top = lua_gettop(L);
-    for (int i = 2; i <= top; ++i) {
+    for (int i = 2; i <= top-1; ++i) {
         if (!lua_isstring(L, i))
             luaL_error(L, "invalid value (%s) at argument #%d for 'join'", luaL_typename(L, i), i);
 
@@ -205,7 +210,10 @@ static const luaL_Reg stringy[] = {
     {NULL, NULL}
 };
 
-int luaopen_stringy(lua_State *L){
+// register table
+DLL int luaopen_stringy(lua_State *L){
     luaL_newlib(L, stringy);
+    lua_pushliteral(L,"stringy 0.7.0");
+    lua_setfield(L,-2,"_VERSION");
     return 1;
 }
